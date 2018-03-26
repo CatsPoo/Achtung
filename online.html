@@ -1,0 +1,432 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/main_style.css">
+        <script src="js/jquery-3.1.1.min.js"></script>
+        
+<style>
+    body {
+        padding: 0px;
+    }
+    
+    li{
+        width: 100%;
+        height: 30px;
+        margin-left: -30px;
+        text-align: left;
+    }
+    #container {
+        position: absolute;
+        margin: 0px;
+        padding: 0px;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .page,.page1 {
+        position: absolute;
+        width: 50%;
+        height: 300px;
+        line-height: 300px;
+        font-size: 50px;
+        text-align: center;
+        border: 2px solid black;
+        left: 50%;
+        top: 100px;
+        margin-left: -25%;
+    }
+    
+    #EnterName {
+        background-color: green;
+        margin-top: 140;
+        font-size: 25px;
+    }
+    #left,#right{
+        width: 50px;
+    }
+    #RoomSelect {
+        background-color: red;
+        left: 150%;
+        height: 70%;
+        width: 60%;
+        margin-left: -30%;
+        margin-top: -20px
+    }
+    #RoomsList,#buttons-bar{
+        width: 350px;
+        height: 80%;
+        margin-top: 5%;
+        margin-left: -45%;
+    }
+    
+    #RoomsList{
+        background-color: cadetblue;
+    }
+    
+    .room{
+        font-size: 25px;
+    }
+    
+    #buttons-bar
+    {
+        float: right;
+        margin-right: 10%;
+    }
+    
+    #Join,#Create{
+        height: 80px;
+        width: 200px;
+        margin-top: 100px;
+        font-size: 20px;
+    }
+    #CreateRoom {
+        background-color: red;
+        top: -150%;
+        left: 50%;
+    }
+    
+    #RoomLoby{
+        background-color: purple;
+        top:150%;
+        height: 80%;
+    }
+    
+    #PlayersList{
+        width: 600px;
+        height: 80%;
+        margin-top: 70;
+        margin-left: 30px;
+        float: left;
+    }
+    #StartButtons{
+        
+        width: 50px;
+        float: right;
+        margin-top: 30%;
+        margin-right: 200px;
+    }
+    #Start,#Ready{
+        width: 150px;
+        height: 70px;
+    }
+    h4{
+        height: 20px;
+        margin-top: -70;
+    }
+</style>
+        
+    </head>
+    <body>
+        <div id="container">
+            
+            <div id="EnterName" class="page">
+                Enter name:
+                <input type="text" id="name"/>
+                Left key:
+                <input onfocusout="onFocusOut(this)" onfocus="onFocus(this)" type="text" id="left" /> Right key:
+                <input onfocusout="onFocusOut(this)" onfocus="onFocus(this)" type="text" id="right"  />
+                <button id="EnterNameBtn" type="button">Contnue</button>
+            </div>
+            
+            <div id="RoomSelect" class="page">
+                <SELECT id="RoomsList" SIZE="4" MULTIPLE>
+                </SELECT>
+                <div id="buttons-bar">
+                    <button type="button" id="Join">Join room!</button>
+                    <button type="button" id="Create">Create new room!</button>
+                </div>
+            </div>
+            
+            <div id="CreateRoom" class="page1">
+                Enter room name:
+                <input type="text" id="RoomName"/>
+                <button id="EnterRoomNameBtn" type="button">Contnue</button>
+            </div>
+            
+            <div id="RoomLoby" class="page1">
+                <h4 id="roomName">hi</h4>
+                <ul id="playersList">
+                </ul>
+                <div id="StartButtons">
+                    <button id="Start" type="button">Start!</button>
+                    <button id="Ready" type="button">Ready!</button>
+                </div>
+            </div>
+            
+        </div>
+        
+                
+        <script src="https://www.gstatic.com/firebasejs/3.5.0/firebase.js"></script>
+        <script src="js/firebase.js"></script>
+        
+        <script src="js/Player.js"></script>
+                
+        <script>
+            var dataBase=firebase.database().ref().child('Rooms');
+            var List=document.getElementById('RoomsList');
+            var pages=document.getElementsByClassName('page');
+            
+            var Player;
+            var room;
+            
+            Room=function(name)
+            {
+                var self={
+                    Name:name,
+                    InGame:false,
+                };
+                self.Id;
+                self.ConnectedPlayers={};
+                self.ConnectedPlayersCount=0;
+                
+                self.SetId=function()
+                {
+                    self.Id=dataBase.push().key;
+                }
+                self.AddPlayer=function(player)
+                {
+                    
+                    var p={
+                        Id:player.Id,
+                        Name:player.Name,
+                        Color:player.Color,
+                        Right:player.Right,
+                        Left:player.Left,
+                        IsHost:player.IsHost,
+                        IsReady:player.IsReady,
+                    }
+                    
+                    self.ConnectedPlayers[p.Id]=p;
+                    self.ConnectedPlayersCount++;
+                    
+                    self.Update();
+                }
+                
+                self.Load=function()
+                {
+                    dataBase.child(self.Id).on('value',function(snapshot)
+                    {
+                        self.ConnectedPlayers=snapshot.val().ConnectedPlayers;
+                        self.ConnectedPlayersCount=snapshot.val().ConnectedPlayersCount;
+                    });
+                }
+                
+                self.Update=function()
+                {
+                    var dataToSend={
+                        Id:self.Id,
+                        Name:self.Name,
+                         ConnectedPlayers:self.ConnectedPlayers,
+                        ConnectedPlayersCount:self.ConnectedPlayersCount,
+                        InGame:self.InGame,
+                    }
+                    dataBase.child(self.Id).set(dataToSend);
+                }
+                
+                self.SetId();
+                
+                return self;
+            }
+            
+            
+            dataBase.on('value',function(snapshot)
+            {
+                var select=true;
+                List.innerHTML='';
+                for(var key in snapshot.val())
+                {
+                    var Room=snapshot.val()[key]; 
+                    if(Room.InGame==true)continue;
+                    var roomItem=document.createElement('option');
+                    roomItem.id=Room.Id;
+                    roomItem.innerHTML=Room.Name;
+                    if(select==true)
+                    {
+                        roomItem.setAttribute('selected','');
+                        select=false;
+                    }
+                    List.appendChild(roomItem);
+                }
+            });
+            
+            
+            onFocus = function (textBox) 
+            {
+                textBox.value = 'press desired ' + textBox.id + ' key'; 
+                window.onkeydown = function (key) 
+                {
+                    textBox.value = key.keyCode; textBox.blur(); 
+                }
+            }
+            onFocusOut = function (textbox) 
+            {
+                window.onkeydown = {}; 
+                if (textbox.value == 'press desired ' + textbox.id + ' key') 
+                {
+                    alert('Click ket to set'); textbox.focus(); 
+                }
+            }
+            document.getElementById('EnterNameBtn').onclick=function() 
+            {
+                var Name=document.getElementById('name').value;
+                var Left=document.getElementById('left').value;
+                var Right=document.getElementById('right').value;
+                if(Name==""&&Left==""&&Right=="") alert('Enter name!')
+                else 
+                {
+                    Player=PlayerData(Name,Left,Right);//id genert with the room
+                    
+                    $(document.getElementById('EnterName')).animate({ left: '-150%', }, 500 ); 
+                    $((document.getElementById('RoomSelect'))).animate({ left: '50%', }, 500 ); 
+                }
+            };
+            document.getElementById('Create').onclick=function()
+            {
+                    $(document.getElementById('RoomSelect')).animate({ left: '-150%', }, 500 ); 
+                    $((document.getElementById('EnterRoomName'))).animate({ left: '50%', }, 500 ); 
+                    $(document.getElementById('CreateRoom')).animate({ top: '25%', }, 500 );  
+            }
+            
+            
+            document.getElementById('EnterRoomNameBtn').onclick=function()
+            {
+                var roomName=document.getElementById('RoomName').value;
+                if(roomName=="") alert('Enter room name!')
+                else
+                {
+                    room=Room(roomName);
+                    Player.Id=dataBase.child(room.Id).child('ConnectedPlayers').push().key;
+                    Player.RoomRef=dataBase.child(room.Id);
+                    Player.IsHost=true;
+                    Player.Color='blue';
+                    Player.IsReady=true;
+                    room.AddPlayer(Player);
+                    
+                    $(document.getElementById('CreateRoom')).animate({ top: '-150%', }, 500 );  
+                    $(document.getElementById('RoomLoby')).animate({ top: '7%', }, 500 );
+                    InitRoomLoby();
+                }
+            }
+            
+            InitRoomLoby=function()
+            {
+                
+                var dbRoomRef=dataBase.child(room.Id);
+                
+                var playerList=document.getElementById('playersList');
+                var start=(document.getElementById('Start'));
+                var ready=(document.getElementById('Ready'));
+                
+                start.disabled=true;
+                document.getElementById('roomName').innerHTML=room.Name;
+                                
+                if(Player.IsHost==true) ready.style.display='none';
+                else start.style.display='none';
+                
+                dbRoomRef.child('ConnectedPlayers').on('value',function(snapshot)
+                {
+                    playerList.innerHTML="";
+                    var CanStart=true;
+                    
+                    var i=1;
+                    for(var k in snapshot.val())
+                    {
+                        room.ConnectedPlayers[snapshot.val()[k].Id]=snapshot.val()[k]; //room.AddPlayer(snapshot.val()[k]);
+                        var item=document.createElement('li');
+                        item.id=snapshot.val()[k].Id;
+                        item.innerHTML=snapshot.val()[k].Name;
+                        item.className='player'+i;
+                        i++;
+                        if(snapshot.val()[k].IsReady==true&&snapshot.val()[k].IsHost==false) item.innerHTML+=" | Ready!";
+                        if(snapshot.val()[k].IsHost==true) item.innerHTML+=" | Host";
+                        playerList.appendChild(item);
+                        
+                        if(snapshot.val()[k].IsReady==false)CanStart=false;
+                    }
+                    start.disabled=!CanStart;
+                });
+            }
+            
+            document.getElementById('Join').onclick=function()
+            {
+                var selectedItem=List[List.selectedIndex];
+                var RoomName=selectedItem.innerHTML;
+                var RoomId=selectedItem.id;
+                
+                Player.IsHost=false;
+                Player.IsReady=false;
+                dataBase.once('value',function(snapshot)
+                {
+                    for(var key in snapshot.val())
+                    {
+                        var temp=snapshot.val()[key];
+                        if(temp.Id==RoomId)
+                        {
+                            room=Room(temp.Name);
+                            room.Id=temp.Id;
+                            room.Load();
+                            Player.Id=dataBase.child(room.Id).child('ConnectedPlayers').push().key;
+                            Player.RoomRef=dataBase.child(room.Id);
+                            Player.SetColor(temp.ConnectedPlayersCount);
+                            room.AddPlayer(Player);
+                            $(document.getElementById('RoomSelect')).animate({ top: '-150%', }, 500 );  
+                            $(document.getElementById('RoomLoby')).animate({ top: '7%', }, 500 );
+                            InitRoomLoby();
+                            break;
+                        }
+                    }
+                });
+            }
+            
+            document.getElementById('Ready').onclick=function()
+            {
+                Player.ChangeIsReadyState();
+                if(Player.IsReady) this.innerHTML="Unready";
+                else this.innerHTML="Ready!";
+                
+                dataBase.child(room.Id).child('InGame').on('value',function(snapshot)
+                {
+                    if(snapshot.val()==true)
+                    {
+                        console.log('start');
+                        MoveToGame();
+                    } 
+                });
+            }
+            
+            document.getElementById('Start').onclick=function()
+            {
+                room.InGame=true;
+                dataBase.child(room.Id).child('InGame').set(room.InGame);
+                MoveToGame();
+            }
+            
+            MoveToGame=function()
+            {
+                SaveData=function(key,value)
+                {
+                    var Data = JSON.stringify(value);
+                    Data = btoa(Data);
+                    localStorage.setItem(key, Data);
+                }
+                Player.RoomRef="";
+                SaveData('_IsOnline',true);
+                SaveData('_Room',room);
+                SaveData('_Player',Player);
+                window.onbeforeunload =function(){};
+                location.href = 'game.html';
+
+            }
+            
+            window.onbeforeunload = function()
+            {
+                if(room.Id!=""&&Player.Id!="")
+                {
+                    if(Player.IsHost==false) dataBase.child(room.Id).child('ConnectedPlayers').child(Player.Id).remove();
+                    else dataBase.child(room.Id).remove();
+                }
+            }
+            
+        </script>
+    </body>
+</html>

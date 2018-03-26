@@ -1,0 +1,29 @@
+<html>
+
+    <head>
+        <link rel="stylesheet" type="text/css" href="css/main_style.css">
+    </head>
+
+    <body>
+        <div class="game-option">
+            <div class="player-list">
+                <ul id="PlayersList">
+                    <li id="player1" class="player1">
+                        Player name:
+                        <input type="text" id="name" class="player1box" /> Left key:
+                        <input onfocusout="onFocusOut(this)" onfocus="onFocus(this)" type="text" id="left" class="player1box" /> Right key:
+                        <input onfocusout="onFocusOut(this)" onfocus="onFocus(this)" type="text" id="right" class="player1box" />
+                    </li>
+                </ul>
+                <div class="button-panel">
+                    <button id="start" type="button" onclick="Start()">Start!</button>
+                    <button id="addLine" type="button" onclick="AddLine()">Add Player</button>
+                </div>
+            </div>
+            <div class="online">
+                <button class="onlinebtn" id="onlineMode" type="button" onclick="MoveToOnline()">Move to online game (coming soon)</button>
+            </div>
+        </div>
+        <script src="js/OpenPage.js"></script>
+    </body>
+</html>

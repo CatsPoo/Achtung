@@ -1,0 +1,138 @@
+body{
+    background-color: black;
+    color: white;
+}
+ul{
+    margin-top: 20%;
+    list-style-type: none;
+}
+li{
+    padding-bottom: 10px;
+    font-size: 30px;
+    font-family: cursive;
+}
+
+.game-option{
+    width: =100%;
+}
+.player-list{
+    float: left;
+    width: 70%;
+}
+.online{
+    float: left;
+    width: 30%;
+    margin-top: 280px;
+}
+
+.onlinebtn{
+    width: 292px;
+    height: 100px;
+    font-size: 25px;
+}
+
+.button-panel{
+    text-align: center;
+}
+
+button{
+    width: 100px;
+    height: 30px;
+}
+
+input[type="text"]
+{
+    background: transparent;
+    height: 40px;
+    background-size: auto;
+    font-size: 15px;
+    width: 100px;
+}
+.player1
+{
+    color:blue;
+}
+.player1box{
+    border-color: blue;
+    color:blue;
+}
+.player2
+{
+    color:red;
+}
+.player2box{
+    border-color: red;
+    color:red;
+}
+.player3
+{
+    color:green;
+}
+.player3box{
+    border-color: green;
+    color:green;
+}
+
+.player4
+{
+    color:yellow;
+}
+.player4box{
+    border-color: yellow;
+    color:yellow;
+}
+
+.player5
+{
+    color:orange;
+}
+.player5box{
+    border-color: orange;
+    color:orange;
+}
+
+.player6
+{
+    color:purple;
+}
+.player6box{
+    border-color: purple;
+    color:purple;
+}
+canvas
+{
+    border-style: solid;
+    border-color: red;
+    border-width: 4px;
+}
+
+.main
+{
+    margin-top: 5%;
+    border-style: dashed;
+    border-color: white;
+    width: 100%;
+}
+.board
+{
+    margin-left: 30%;
+}
+.ScoreList{
+   
+    font-family:sans-serif;
+    margin-left: 10%;
+    margin-top: 2%;
+    float: left;
+}
+.goal{
+    font-size: 35px;
+    color: yellow;
+    float: inherit;
+}
+.ScoreListItem
+{
+    font-size: 25px;
+    float: inherit;
+}
+
+
